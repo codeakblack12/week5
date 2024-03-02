@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define BUFSIZE 256
 
@@ -12,19 +14,9 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    char cmd[BUFSIZE];
-    snprintf(cmd, sizeof(cmd), "wc -c < %s", argv[1]);
-    FILE* pipe = popen(cmd, "r");
-    if (pipe == NULL) {
-        perror("popen");
-        return 1;
-    }
+    char* cmd[] = { "wc", "-c", argv[1], NULL };
+    execve("/usr/bin/wc", cmd, NULL);
 
-    char result[BUFSIZE];
-    while (fgets(result, sizeof(result), pipe) != NULL) {
-        printf("File size: %s", result);
-    }
-
-    pclose(pipe);
-    return 0;
+    perror("execve");
+    return 1;
 }
